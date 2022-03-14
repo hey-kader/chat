@@ -1,6 +1,6 @@
 local socket = require "socket" 
 
-ip = "66.85.133.188"
+ip = "*"
 port = 8888
 
 udp = socket:udp()
@@ -22,42 +22,39 @@ function update()
 	whitelist = read_file()
 end
 
--- returns true if user in users
-function auth (user, users)
-	for i in #users do
-		if users[i] == user then
+function auth (user)
+	for i in ipairs(whitelist) do
+		if whitelist[i] == user then
 			return true
 		end
 	end
 	return false
 end
 
--- splits tape into list
 function split (content, delimiter)
-	list = {}
+	local list = {}
 	for match in (content..delimiter):gmatch("(.-)"..delimiter) do
-		if #match > 1 then
-			table.insert(list, match)
-		end
+		table.insert(list, match)
 	end
 	return list
 end
 
 print ("serving on: " .. ip .. ":" .. port)
+
 repeat 
 	update()	
-	data, msg_or_ip, port_or_nil = udp:recievefrom()
+	data, msg_or_ip, port_or_nil = udp:receivefrom()
 	if data then
-		entity, cmd, parms = data:match("^(%S) (%S) (.*)")
+		local msg = split(data, " ")
+		user, cmd = msg[1], msg[2]
 		if cmd == "auth" then
-			if auth(entity, whitelist) then
-				table.insert (online, entity)
-				udp:sendto("authed", msg_or_ip, port_or_nil)
+			if auth(user) then
+				local ip = msg_or_ip
+				local port = port_or_nil
+				print (ip, port)
+				table.insert(online, user)
+				udp:sendto("success", msg_or_ip, port_or_nil)
 			end
-		end
-	elseif cmd == "update" then
-		for user in online do
-			udp:sendto(parms, msg_or_ip, port_or_nil)
 		end
 	end
 until not true 
