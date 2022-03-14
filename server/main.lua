@@ -1,12 +1,11 @@
-require "colors"
-require "font"
+local socket = require "socket" 
 
-socket = require "socket"
-ip, port = "localhost", 8080
+ip = "66.85.133.188"
+port = 8888
 
-udp = socket.udp()
-udp:setsockaddr(ip, port)
+udp = socket:udp()
 udp:settimeout(0)
+udp:setsockname(ip, port)
 
 whitelist = {}
 online = {}
@@ -19,18 +18,7 @@ function read_file ()
 	return content 
 end
 
-function love.draw()
-	i = 16 
-	love.graphics.setColor(blue)
-	love.graphics.print("online: ".."("..#online.."/"..#whitelist..")")
-	for k, v in ipairs(whitelist) do 
-		love.graphics.setColor(white)
-		love.graphics.print(v..": ", 0, i)
-		i = i + 16
-	end
-end
-
-function love.update()
+function update()
 	whitelist = read_file()
 end
 
@@ -54,3 +42,8 @@ function split (content, delimiter)
 	end
 	return list
 end
+
+print ("serving on: " .. ip .. ":" .. port)
+repeat 
+	update()	
+until not true 
