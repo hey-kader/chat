@@ -4,9 +4,11 @@ udp = socket.udp()
 udp:setpeername(address, port)
 udp:settimeout(0)
 
-message = ""
-name = "henry"
-color = {0, 1, 0, 1}
+function love.load()
+	print ("name: ")
+	name = io.read("*l")
+	message = ""
+end
 
 function love.keypressed(key)
   if key == 'return' then
@@ -21,12 +23,14 @@ function love.keypressed(key)
   end
 end
 
-function love.load ()
-end
-
 function love.update ()
-  udp:send(name..": "..message)
+  udp:send(name.."-"..message)
   data = udp:receive()
+	if data then
+		for user in data do
+			print (user)
+		end
+	end
 end
 
 function love.draw ()
