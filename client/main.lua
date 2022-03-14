@@ -1,15 +1,14 @@
 local socket = require "socket"
-local address, port = "localhost", 12345
+local address, port = "66.85.133.188", 8888
+
 udp = socket.udp()
 udp:setpeername(address, port)
 udp:settimeout(0)
 
-function love.load()
-	print ("name: ")
-	name = io.read("*l")
-	message = ""
-end
+print ("name: ")
+name = io.read("*l")
 
+message = ""
 function love.keypressed(key)
   if key == 'return' then
     udp:send(message)
@@ -24,12 +23,9 @@ function love.keypressed(key)
 end
 
 function love.update ()
-  udp:send(name.."-"..message)
-  data = udp:receive()
+  udp:send(name.." ".."auth")
 	if data then
-		for user in data do
-			print (user)
-		end
+		data = udp:receive()
 	end
 end
 

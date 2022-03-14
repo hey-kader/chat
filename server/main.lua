@@ -46,4 +46,18 @@ end
 print ("serving on: " .. ip .. ":" .. port)
 repeat 
 	update()	
+	data, msg_or_ip, port_or_nil = udp:recievefrom()
+	if data then
+		entity, cmd, parms = data:match("^(%S) (%S) (.*)")
+		if cmd == "auth" then
+			if auth(entity, whitelist) then
+				table.insert (online, entity)
+				udp:sendto("authed", msg_or_ip, port_or_nil)
+			end
+		end
+	elseif cmd == "update" then
+		for user in online do
+			udp:sendto(parms, msg_or_ip, port_or_nil)
+		end
+	end
 until not true 
