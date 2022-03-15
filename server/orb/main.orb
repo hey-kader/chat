@@ -1,0 +1,6 @@
+
+--#!lua
+local uv = require "luv"
+udp = uv.new_udp()
+print ('worked')
+--#/lua
