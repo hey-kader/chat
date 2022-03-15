@@ -1,25 +1,31 @@
-local socket = require "socket" 
+socket = require "socket"
+ip, port = "*", 8888
 
-ip = "*"
-port = 8888
-
-udp = socket:udp()
-udp:settimeout(0)
+udp = socket.udp() 
 udp:setsockname(ip, port)
+udp:settimeout(0)
 
-whitelist = {}
-online = {}
+whitelist = {} online = {}
 
 function read_file ()
 	local file = io.open("whitelist.txt", "rb")
-	local content = file:read("*a")
-	content = split(content, "\n")
+	local body = file:read("*a")
+	body = split(body, "\n")
 	file:close()	
-	return content 
+	return body 
 end
 
 function update()
 	whitelist = read_file()
+end
+
+function is_online (user)
+	for k, v in pairs (online) do
+		if user == v then
+			return true
+		end
+	end
+	return false
 end
 
 function auth (user)
@@ -33,13 +39,11 @@ end
 
 function split (content, delimiter)
 	local list = {}
-	for match in (content..delimiter):gmatch("(.-)"..delimiter) do
+	for match in (content .. delimiter):gmatch("(.-)"..delimiter) do
 		table.insert(list, match)
 	end
 	return list
 end
-
-print ("serving on: " .. ip .. ":" .. port)
 
 repeat 
 	update()	
@@ -49,11 +53,15 @@ repeat
 		user, cmd = msg[1], msg[2]
 		if cmd == "auth" then
 			if auth(user) then
-				local ip = msg_or_ip
-				local port = port_or_nil
-				print (ip, port)
-				table.insert(online, user)
-				udp:sendto("success", msg_or_ip, port_or_nil)
+				if not is_online (user) then
+					table.insert(online, user)
+					udp:sendto("success", msg_or_ip, port_or_nil)
+					local dg = string.format(msg_or_ip .. '    ' .. port_or_nil .. '    ' ..user .. '    ' .. cmd .. '    ' .. '('..os.date("%c")..')')
+					print (dg)
+					udp:sendto(dg, msg_or_ip, port_or_nil)
+				else
+					udp:sendto("user already online", msg_or_ip, port_or_nil)
+				end
 			end
 		end
 	end

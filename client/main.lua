@@ -1,5 +1,5 @@
 local socket = require "socket"
-local address, port = "localhost", 8888
+local address, port = "kader.international", 8888
 
 udp = socket.udp()
 udp:setpeername(address, port)
@@ -9,8 +9,14 @@ name = io.read("*l")
 udp:send(name .. " " .. "auth")
 
 repeat
+	data = udp:receive() 
+until data 
+
+print (data)
+
+repeat
 	data = udp:receive()
 	if data then
 		print (data)
 	end
-until not true
+until not true 
